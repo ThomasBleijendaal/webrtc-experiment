@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebRTC experiment</title>
+        <style>
+            textarea { border: 1px solid gray; }
+            #localSdp { background-color: #ddffdd; }
+            #remoteSdp { background-color: #ffdddd; }
+            #localCandidate { background-color: #ddffdd; }
+            #remoteCandidate { background-color: #ffdddd; }
+        </style>
+    </head>
+    <body>
+        <button id="createOffer">Create offer</button>
+        
+        <hr>
+
+        <textarea id="localSdp" cols="50" rows="15"></textarea>
+        <textarea id="remoteSdp" cols="50" rows="15"></textarea>
+
+        <hr>
+
+        <textarea id="localCandidate" cols="50" rows="15"></textarea>
+        <textarea id="remoteCandidate" cols="50" rows="15"></textarea>
+
+        <hr>
+        
+        <button id="createAnswer">Create answer</button>
+        <button id="setAnswer">Set answer</button>
+
+        <hr>
+
+        <button id="sendStuff">Send stuff</button>
+
+        <script src="./main.js"></script>
+    </body>
+</html>
