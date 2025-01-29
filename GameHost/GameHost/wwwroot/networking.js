@@ -1,7 +1,5 @@
 function createMessage(type, from, to, content) { return JSON.stringify({ type: type, from: from, to: to, content: content }); };
 
-const target = document.querySelector("#messages");
-
 class RtcsManager {
     static ws = null;
 
@@ -20,9 +18,9 @@ class RtcsManager {
             let from = message.from;
             let to = message.to;
 
-            console.log("WS", message);
+            //console.log("WS", message);
             if (to != null && to != this.id) {
-                console.log("IGNORING");
+                //console.log("IGNORING");
                 return;
             }
 
@@ -34,26 +32,26 @@ class RtcsManager {
 
                 this.peers[from] = newPeer;
 
-                console.log("JOIN", from);
+                //console.log("JOIN", from);
 
             } else if (message.type === "offer") {
 
                 if (!this.peers[from]) {
-                    console.log("OFFER", from);
+                    //console.log("OFFER", from);
                     this.peers[from] = new Rtc(this.ws, from, this.id);
                     this.peers[from].handleRemote(message.type, message.content);
                 }
                 else {
-                    console.log("OFFER ALREADY KNOWN");
+                    //console.log("OFFER ALREADY KNOWN");
                 }
 
             } else if (message.type === "answer") {
 
                 if (this.peers[from]) {
-                    console.log("ANWER", from);
+                    //console.log("ANWER", from);
 
                     if (this.peers[from].isConnected()) {
-                        console.log("ALREADY KNOWN", from);
+                        //console.log("ALREADY KNOWN", from);
                     }
                     else {
                         this.peers[from].handleRemote(message.type, message.content);
@@ -66,7 +64,7 @@ class RtcsManager {
 
                 if (candidate) {
                     if (this.peers[from]) {
-                        console.log("CANDIDATE", from);
+                        //console.log("CANDIDATE", from);
                         this.peers[from].addCandicate(message.content);
                     }
                 }
@@ -74,7 +72,7 @@ class RtcsManager {
         };
 
         this.ws.onopen = (event) => {
-            console.log("WS open");
+            //console.log("WS open");
 
             this.ws.send(createMessage("join", this.id, null, { id: this.id }));
         }
@@ -84,10 +82,12 @@ class RtcsManager {
         this.peers[peerId] = null;
     }
 
-    static sendStuff = function () {
+    static sendState = function () {
         for (let peer of Object.values(this.peers)) {
-            console.log("SENDING TO", peer.id);
-            peer.sendStuff();
+            //console.log("SENDING TO", peer.remote);
+            if (peer) {
+                peer.sendState();
+            }
         }
     }
 }
@@ -102,8 +102,6 @@ class Rtc {
 
     ws = null;
 
-    msgCount = 0;
-
     constructor(ws, remote, local) {
         this.remote = remote;
         this.local = local;
@@ -115,23 +113,23 @@ class Rtc {
         this.ws = ws;
 
         this.pc.onicecandidate = (event) => {
-            console.log("ICE", event);
+            //console.log("ICE", event);
             if (event.type === "icecandidate" && event.candidate) {
                 this.ws.send(createMessage("candidate", this.local, this.remote, event.candidate));
             }
         };
 
         this.pc.onconnectionstatechange = (event) => {
-            console.log("CONNECTION CHANGE", event);
+            //console.log("CONNECTION CHANGE", event);
 
             if (this.pc.connectionState == "closed" || this.pc.connectionState == "failed") {
-                console.log("REMOVE", this.pc.remote);
+                //console.log("REMOVE", this.pc.remote);
                 RtcsManager.remove(this.pc.remote);
             }
         };
 
         this.pc.ondatachannel = (event) => {
-            console.log("DATACHANNEL", event);
+            //console.log("DATACHANNEL", event);
 
             this.dataChannel = event.channel;
             this.setupChannel();
@@ -153,7 +151,7 @@ class Rtc {
     }
 
     isConnected = function () {
-        console.log(this.pc.signalingState);
+        //console.log(this.pc.signalingState);
         return this.pc.signalingState === "stable";
     }
 
@@ -174,17 +172,24 @@ class Rtc {
 
     setupChannel = function () {
         this.dataChannel.onopen = (event) => {
-            console.log("DATA", event);
+            //console.log("DATA", event);
         };
 
         this.dataChannel.onmessage = (event) => {
-            console.log("MESSAGE", event);
+            //console.log("MESSAGE", event);
 
-            this.msgCount++;
+            let remoteState = JSON.parse(event.data);
 
-            console.log(this.msgCount);
+            if (!otherGameStates[this.remote]) {
+                otherGameStates[this.remote] = new NetworkState();
+            }
 
-            target.value = target.value + event.data;
+            otherGameStates[this.remote].ship.color = remoteState.ship.color;
+            otherGameStates[this.remote].ship.x = remoteState.ship.x;
+            otherGameStates[this.remote].ship.y = remoteState.ship.y;
+            otherGameStates[this.remote].ship._angle = remoteState.ship._angle;
+            otherGameStates[this.remote].ship._length = remoteState.ship._length;
+            otherGameStates[this.remote].ship._width = remoteState.ship._width;
         };
     }
 
@@ -194,10 +199,16 @@ class Rtc {
         }
     }
 
-    sendStuff = function () {
-        this.dataChannel.send("HI");
+    sendState = function () {
+        if (this.dataChannel) {
+            try {
+                this.dataChannel.send(networkGameState);
+            }
+            catch {
+                console.log(this.dataChannel);
+                RtcsManager.remove(this.pc.remote);
+            }
+        }
     }
 }
 
-document.querySelector("#sendStuff").onclick = function () { RtcsManager.sendStuff(); };
-document.querySelector("#messages").value = "";

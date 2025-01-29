@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>WebRTC experiment</title>
-        <style>
-            textarea { border: 1px solid gray; }
-            #localSdp { background-color: #ddffdd; }
-            #remoteSdp { background-color: #ffdddd; }
-            #localCandidate { background-color: #ddffdd; }
-            #remoteCandidate { background-color: #ffdddd; }
-        </style>
-    </head>
-    <body>
-        <textarea id="messages" cols="50" rows="30"></textarea>
+<head>
+    <title>Masts of Mayhem</title>
+    <style>
+        body {
+            background: black;
+            font-family: 'Courier New', Courier, monospace;
+        }
 
-        <button id="sendStuff">Send stuff</button>
+        h1 {
+            font-size: 12px;
+            color: white;
+            text-align: center;
+        }
 
-        <script src="./main.js"></script>
-    </body>
+        #game {
+            display: block;
+            margin: 0px auto;
+            border: 1px solid white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Masts of Mayhem</h1>
+    <canvas id="game" width="1440" height="900"></canvas>
+
+    <script src="./networking.js"></script>
+    <script src="./classes.js"></script>
+    <script src="./rendering.js"></script>
+    <script src="./game.js"></script>
+</body>
 </html>
