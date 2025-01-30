@@ -40,7 +40,7 @@ function drawShip(ship, cannonBalls) {
     ctx.fill(shipPath);
 
     for (let b of cannonBalls) {
-        if (ctx.isPointInPath(shipPath, b[0].x, b[0].y)) {
+        if (ctx.isPointInPath(shipPath, b.x, b.y)) {
             cannonBallsHit++;
         }     
     }
@@ -87,7 +87,6 @@ function drawCannonBall(cannonBall) {
 function drawFrame() {
     drawSea();
 
-    // TODO: get from network state too
     for (let d of debris.entries()) {
         drawDebris(d[0]);
 
@@ -96,7 +95,6 @@ function drawFrame() {
         }
     }
 
-    // TODO: get from network state too
     for (let b of cannonBalls.entries()) {
         drawCannonBall(b[0]);
 
@@ -105,16 +103,25 @@ function drawFrame() {
         }
     }
 
-    //console.log(Object.values(otherGameStates));
     for (let remoteState of Object.values(otherGameStates)) {
-        //console.log(remoteState);
+        if (remoteState.debris) {
+            for (let d of remoteState.debris) {
+                drawDebris(d);
+            }
+        }
+
+        if (remoteState.cannonBalls) {
+            for (let b of remoteState.cannonBalls) {
+                drawCannonBall(b);
+            }
+        }
+
         if (remoteState.ship) {
-            //console.log("DRAW REMOTE");
             drawShip(remoteState.ship, []);
         };
     }
 
-    let hits = drawShip(ship, cannonBalls.entries());
+    let hits = drawShip(ship, Object.values(otherGameStates).flatMap(x => x.cannonBalls));
 
     ship.health -= hits * 0.01;
     for (let i = 0; i < hits; i++) {

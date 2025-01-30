@@ -1,12 +1,21 @@
 class NetworkState {
     ship = new NetworkShip();
+    debris = [];
+    cannonBalls = [];
 }
 
-class NetworkShip {
-    color = "red";
+class NetworkParticle {
+    x = 0;
+    y = 0;
 
-    x = 500;
-    y = 500;
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class NetworkShip extends NetworkParticle {
+    color = "red";
 
     _angle = 0;
     _length = 0;
@@ -29,9 +38,6 @@ class Ship extends NetworkShip {
     direction = 0;
     speed = 0;
 
-    x = 500;
-    y = 500;
-
     masts = 1;
     cannons = 10;
     loadedCannons = 0;
@@ -51,25 +57,16 @@ class Ship extends NetworkShip {
     }
 }
 
-class Debris {
-    x = 0;
-    y = 0;
-
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
+class Debris extends NetworkParticle {
 }
 
-class CannonBall {
-    x = 0;
-    y = 0;
+class CannonBall extends NetworkParticle {
     direction = 0;
     age = 0;
 
     constructor(x, y, direction) {
-        this.x = x;
-        this.y = y;
+        super(x, y);
+
         this.direction = direction;
     }
 

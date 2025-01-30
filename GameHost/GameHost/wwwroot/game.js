@@ -4,9 +4,7 @@ const ctx = canvas.getContext("2d");
 const width = canvas.width;
 const height = canvas.height;
 
-const ship = new Ship();
-ship.x = Math.random() * width;
-ship.y = Math.random() * height;
+const ship = new Ship(Math.random() * width, Math.random() * height);
 ship.direction = ((ship.x > width / 2) ? 270 : 90) + ((ship.y > height / 2) ? 90 : 0)
 
 const debris = new Set();
@@ -52,7 +50,12 @@ function prepareState() {
     state.ship._length = ship.length();
     state.ship._width = ship.width();
 
+    state.debris = [...debris].map(x => new NetworkParticle(x.x, x.y));
+    state.cannonBalls = [...cannonBalls].map(x => new NetworkParticle(x.x, x.y));
+
     networkGameState = JSON.stringify(state);
+
+    // console.log(networkGameState);
 }
 
 function receiveState(id, state) {

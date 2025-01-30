@@ -190,6 +190,9 @@ class Rtc {
             otherGameStates[this.remote].ship._angle = remoteState.ship._angle;
             otherGameStates[this.remote].ship._length = remoteState.ship._length;
             otherGameStates[this.remote].ship._width = remoteState.ship._width;
+
+            otherGameStates[this.remote].debris = remoteState.debris.map(x => new NetworkParticle(x.x, x.y));
+            otherGameStates[this.remote].cannonBalls = remoteState.cannonBalls.map(x => new NetworkParticle(x.x, x.y));
         };
     }
 
