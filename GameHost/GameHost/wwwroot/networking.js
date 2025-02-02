@@ -164,6 +164,22 @@ class Rtc {
 
             otherGameStates[this.remote].debris = remoteState.debris.map(x => new NetworkParticle(x.x, x.y));
             otherGameStates[this.remote].cannonBalls = remoteState.cannonBalls.map(x => new NetworkParticle(x.x, x.y));
+            otherGameStates[this.remote].events = remoteState.events;
+
+            if (remoteState.events.length > 0) {
+                let dx = remoteState.ship.x - ship.x;
+                let dy = remoteState.ship.y - ship.y;
+                let distance = Math.sqrt((dx * dx) + (dy * dy));
+
+                for (let event of remoteState.events) {
+                    if (event == cannonFireEvent) {
+                        AudioManager.playCannonFire(distance);
+                    }
+                    else if (event == hitEvent) {
+                        AudioManager.playHit(distance);
+                    }
+                }
+            }
         };
     }
 

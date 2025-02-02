@@ -9,6 +9,9 @@ ship.direction = ((ship.x > width / 2) ? 270 : 90) + ((ship.y > height / 2) ? 90
 
 const debris = new Set();
 const cannonBalls = new Set();
+const events = new Set();
+const cannonFireEvent = 1;
+const hitEvent = 2;
 
 // TODO: remove state of clients that are gone
 const otherGameStates = {};
@@ -35,6 +38,7 @@ function fireCannon(starboard) {
     ));
 
     AudioManager.playCannonFire(1);
+    events.add(cannonFireEvent);
 }
 
 function spawnDebris() {
@@ -55,8 +59,11 @@ function prepareState() {
 
     state.debris = [...debris].map(x => new NetworkParticle(x.x, x.y));
     state.cannonBalls = [...cannonBalls].map(x => new NetworkParticle(x.x, x.y));
+    state.events = [...events];
 
     networkGameState = JSON.stringify(state);
+
+    events.clear();
 
     //console.log(networkGameState);
 }
@@ -177,6 +184,8 @@ function handleDamage(hits) {
         spawnDebris();
 
         AudioManager.playHit(1);
+
+        events.add(hitEvent);
     }
 }
 

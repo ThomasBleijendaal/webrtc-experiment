@@ -2,6 +2,7 @@ class NetworkState {
     ship = new NetworkShip();
     debris = [];
     cannonBalls = [];
+    events = [];
 }
 
 class NetworkParticle {

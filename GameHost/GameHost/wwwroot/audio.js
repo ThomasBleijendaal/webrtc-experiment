@@ -31,32 +31,40 @@ class AudioManager {
         this.hitSound = await this.preloadFile("/audio/hit1.mp3");
     }
 
-    static playSound = function (audioBuffer, volume, detune, offset, length) {
+    static playSound = function (audioBuffer, distance, randomize, offset, length) {
+        if (distance > 2 * width) {
+            return;
+        }
+
         const trackSource = this.audioCtx.createBufferSource();
         const gain = this.audioCtx.createGain();
         trackSource.buffer = audioBuffer;
         trackSource.connect(gain);
         gain.connect(this.audioCtx.destination);
 
-        if (detune) {
-            trackSource.detune.value = 2400 * (0.5 - Math.random());
+        if (randomize) {
+            trackSource.detune.value = -1200 * Math.random();
         }
 
-        gain.gain.value = volume;
+        gain.gain.value = Math.max(0, 1.0 - (distance / width / 4.0));
+        if (distance > 1) {
+            trackSource.detune.value += -1200.0 * (distance / (width / 1.5));
+            gain.gain.value /= 2.0;
+        }
 
         if (offset && length) {
-            trackSource.start(0, offset, length);
+            trackSource.start(0, offset, length * (1.0 - (distance / width)));
         }
         else {
             trackSource.start();
         }
     }
 
-    static playCannonFire = function (volume) {
-        this.playSound(this.cannonFireSound, volume, true);
+    static playCannonFire = function (distance) {
+        this.playSound(this.cannonFireSound, distance, true);
     }
 
-    static playHit = function (volume) {
-        this.playSound(this.hitSound, volume, true, Math.random() * 2, 1);
+    static playHit = function (distance) {
+        this.playSound(this.hitSound, distance, true, Math.random() * 2, 1);
     }
 }
