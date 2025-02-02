@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 const width = canvas.width;
 const height = canvas.height;
 
-const ship = new Ship(Math.random() * width, Math.random() * height);
+const ship = new Ship(0.9 * Math.random() * width + 10, 0.9 * Math.random() * height + 10);
 ship.direction = ((ship.x > width / 2) ? 270 : 90) + ((ship.y > height / 2) ? 90 : 0)
 
 const debris = new Set();
@@ -33,6 +33,8 @@ function fireCannon(starboard) {
         ship.y + dy,
         ship.direction + (starboard ? 90 : -90)
     ));
+
+    AudioManager.playCannonFire(1);
 }
 
 function spawnDebris() {
@@ -49,13 +51,14 @@ function prepareState() {
     state.ship._angle = ship.angle();
     state.ship._length = ship.length();
     state.ship._width = ship.width();
+    state.ship._health = ship.health();
 
     state.debris = [...debris].map(x => new NetworkParticle(x.x, x.y));
     state.cannonBalls = [...cannonBalls].map(x => new NetworkParticle(x.x, x.y));
 
     networkGameState = JSON.stringify(state);
 
-    // console.log(networkGameState);
+    //console.log(networkGameState);
 }
 
 function receiveState(id, state) {
@@ -73,6 +76,8 @@ let firingPortCannons = false;
 let firingStarboardCannons = false;
 
 window.onkeydown = (event) => {
+    AudioManager.init();
+
     if (event.code === "ArrowUp") {
         accelerate = true;
         event.preventDefault();
@@ -93,7 +98,7 @@ window.onkeydown = (event) => {
         firingPortCannons = true;
         event.preventDefault();
     }
-    if (event.code === "KeyS") {
+    else if (event.code === "KeyS") {
         firingStarboardCannons = true;
         event.preventDefault();
     }
@@ -112,13 +117,22 @@ window.onkeyup = (event) => {
         decelerate = false;
     }
     if (event.code === "KeyQ") {
-        ship.cannons += 2;
+        if (ship.upgrades > 0) {
+            ship.cannons += 2;
+            ship.upgrades--;
+        }
     }
     if (event.code === "KeyW") {
-        ship.masts += 1;
+        if (ship.upgrades > 0) {
+            ship.masts += 1;
+            ship.upgrades--;
+        }
     }
-    if (event.code === "KeyD") {
-        spawnDebris();
+    if (event.code === "KeyE") {
+        if (ship.upgrades > 0) {
+            ship.healthRemaining = ship.maxHealth();
+            ship.upgrades--;
+        }
     }
     if (event.code === "KeyA") {
         firingPortCannons = false;
@@ -153,6 +167,19 @@ function handleInputs() {
     }
 }
 
+function handleDamage(hits) {
+    if (hits == 0) {
+        return;
+    }
+
+    ship.healthRemaining -= hits * 0.01;
+    for (let i = 0; i < hits; i++) {
+        spawnDebris();
+
+        AudioManager.playHit(1);
+    }
+}
+
 function handleState() {
     if (ship.speed > 0) {
         let angle = ship.angle();
@@ -162,6 +189,23 @@ function handleState() {
 
         ship.x += dx;
         ship.y += dy;
+
+        if (ship.x < -30) {
+            ship.x = height + 29;
+            handleDamage(10);
+        }
+        if (ship.x > height + 30) {
+            ship.x = -29;
+            handleDamage(10);
+        }
+        if (ship.y < -30) {
+            ship.y = width + 29;
+            handleDamage(10);
+        }
+        if (ship.y > width + 30) {
+            ship.y = -29;
+            handleDamage(10);
+        }
     }
     for (let b of cannonBalls.entries()) {
         let angle = b[0].angle();
@@ -172,6 +216,19 @@ function handleState() {
         b[0].x += dx;
         b[0].y += dy;
         b[0].age += 1;
+
+        if (b[0].x < -30) {
+            b[0].x = height + 29;
+        }
+        if (b[0].x > height + 30) {
+            b[0].x = -29;
+        }
+        if (b[0].y < -30) {
+            b[0].y = width + 29;
+        }
+        if (b[0].y > width + 30) {
+            b[0].y = -29;
+        }
     }
 }
 
@@ -198,7 +255,7 @@ function gameLoop(timeStamp) {
         fireTick = 0;
         fireCannonTick = true;
     }
-    
+
     handleInputs();
     handleState();
 

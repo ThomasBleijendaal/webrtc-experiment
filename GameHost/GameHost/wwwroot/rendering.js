@@ -12,8 +12,9 @@ function drawSea() {
  * @param {any} cannonBalls
  * @returns
  */
-function drawShip(ship, cannonBalls) {
+function drawShip(ship, cannonBalls, otherShips) {
     let cannonBallsHit = 0;
+    let shipsHit = 0;
 
     let shipAngle = ship.angle();
     let shipWidth = ship.width();
@@ -31,9 +32,11 @@ function drawShip(ship, cannonBalls) {
     shipPath.lineTo(0, shipLength);
 
     ctx.beginPath();
-    ctx.fillStyle = ship.color;
 
     ctx.translate(ship.x, ship.y);
+
+    ctx.fillStyle = ship.color;
+
     ctx.rotate(shipAngle);
     ctx.translate(-halfWidth, -halfLength);
 
@@ -42,7 +45,12 @@ function drawShip(ship, cannonBalls) {
     for (let b of cannonBalls) {
         if (ctx.isPointInPath(shipPath, b.x, b.y)) {
             cannonBallsHit++;
-        }     
+        }
+    }
+    for (let s of otherShips) {
+        if (ctx.isPointInPath(shipPath, s.x, s.y)) {
+            shipsHit++;
+        }
     }
 
     ctx.translate(-halfWidth, halfLength);
@@ -55,14 +63,54 @@ function drawShip(ship, cannonBalls) {
     ctx.fill();
 
     ctx.rotate(-shipAngle);
+
+    ctx.font = '10px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText(`${Math.floor(ship.health() * 100)}%`, -12, -20);
+
+
     ctx.translate(-ship.x, -ship.y);
 
-    return cannonBallsHit;
+    return cannonBallsHit + shipsHit * 10;
 }
 
-function drawDebris(debris) {
+/**
+ * *
+ * @param {NetworkShip} ship
+ * @param {any} cannonBalls
+ * @returns
+ */
+function drawHighlight(ship) {
     ctx.beginPath();
-    ctx.fillStyle = "brown";
+
+    ctx.translate(ship.x, ship.y);
+
+    ctx.fillStyle = "#5090ff";
+    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.translate(-ship.x, -ship.y);
+}
+
+function drawUpgrades(ship) {
+    ctx.beginPath();
+
+    ctx.translate(width - 20, 20);
+
+    ctx.fillStyle = "gold";
+    ctx.arc(0, 0, 20, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.font = '15px Arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText(ship.upgrades, -4, 4);
+
+    ctx.translate(-width + 20, -20);
+}
+
+function drawDebris(debris, ship) {
+    ctx.beginPath();
+    ctx.fillStyle = ship.color;
 
     ctx.translate(debris.x, debris.y);
 
@@ -86,9 +134,10 @@ function drawCannonBall(cannonBall) {
 
 function drawFrame() {
     drawSea();
+    drawHighlight(ship);
 
     for (let d of debris.entries()) {
-        drawDebris(d[0]);
+        drawDebris(d[0], ship);
 
         if (Math.random() <= 0.005) {
             debris.delete(d[0]);
@@ -106,7 +155,7 @@ function drawFrame() {
     for (let remoteState of Object.values(otherGameStates)) {
         if (remoteState.debris) {
             for (let d of remoteState.debris) {
-                drawDebris(d);
+                drawDebris(d, remoteState.ship);
             }
         }
 
@@ -117,14 +166,16 @@ function drawFrame() {
         }
 
         if (remoteState.ship) {
-            drawShip(remoteState.ship, []);
+            drawShip(remoteState.ship, [], []);
         };
     }
 
-    let hits = drawShip(ship, Object.values(otherGameStates).flatMap(x => x.cannonBalls));
+    drawUpgrades(ship);
 
-    ship.health -= hits * 0.01;
-    for (let i = 0; i < hits; i++) {
-        spawnDebris();
-    }
+    let gameStates = Object.values(otherGameStates);
+
+    let hits = drawShip(ship,
+        gameStates.flatMap(x => x.cannonBalls),
+        gameStates.map(x => x.ship));
+    handleDamage(hits);
 }

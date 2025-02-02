@@ -18,9 +18,7 @@ class RtcsManager {
             let from = message.from;
             let to = message.to;
 
-            //console.log("WS", message);
             if (to != null && to != this.id) {
-                //console.log("IGNORING");
                 return;
             }
 
@@ -32,28 +30,17 @@ class RtcsManager {
 
                 this.peers[from] = newPeer;
 
-                //console.log("JOIN", from);
-
             } else if (message.type === "offer") {
 
                 if (!this.peers[from]) {
-                    //console.log("OFFER", from);
                     this.peers[from] = new Rtc(this.ws, from, this.id);
                     this.peers[from].handleRemote(message.type, message.content);
-                }
-                else {
-                    //console.log("OFFER ALREADY KNOWN");
                 }
 
             } else if (message.type === "answer") {
 
                 if (this.peers[from]) {
-                    //console.log("ANWER", from);
-
-                    if (this.peers[from].isConnected()) {
-                        //console.log("ALREADY KNOWN", from);
-                    }
-                    else {
+                    if (!this.peers[from].isConnected()) {
                         this.peers[from].handleRemote(message.type, message.content);
                     }
                 }
@@ -64,7 +51,6 @@ class RtcsManager {
 
                 if (candidate) {
                     if (this.peers[from]) {
-                        //console.log("CANDIDATE", from);
                         this.peers[from].addCandicate(message.content);
                     }
                 }
@@ -72,8 +58,6 @@ class RtcsManager {
         };
 
         this.ws.onopen = (event) => {
-            //console.log("WS open");
-
             this.ws.send(createMessage("join", this.id, null, { id: this.id }));
         }
     }
@@ -84,7 +68,6 @@ class RtcsManager {
 
     static sendState = function () {
         for (let peer of Object.values(this.peers)) {
-            //console.log("SENDING TO", peer.remote);
             if (peer) {
                 peer.sendState();
             }
@@ -113,24 +96,18 @@ class Rtc {
         this.ws = ws;
 
         this.pc.onicecandidate = (event) => {
-            //console.log("ICE", event);
             if (event.type === "icecandidate" && event.candidate) {
                 this.ws.send(createMessage("candidate", this.local, this.remote, event.candidate));
             }
         };
 
         this.pc.onconnectionstatechange = (event) => {
-            //console.log("CONNECTION CHANGE", event);
-
             if (this.pc.connectionState == "closed" || this.pc.connectionState == "failed") {
-                //console.log("REMOVE", this.pc.remote);
                 RtcsManager.remove(this.pc.remote);
             }
         };
 
         this.pc.ondatachannel = (event) => {
-            //console.log("DATACHANNEL", event);
-
             this.dataChannel = event.channel;
             this.setupChannel();
         };
@@ -151,7 +128,6 @@ class Rtc {
     }
 
     isConnected = function () {
-        //console.log(this.pc.signalingState);
         return this.pc.signalingState === "stable";
     }
 
@@ -171,13 +147,7 @@ class Rtc {
     }
 
     setupChannel = function () {
-        this.dataChannel.onopen = (event) => {
-            //console.log("DATA", event);
-        };
-
         this.dataChannel.onmessage = (event) => {
-            //console.log("MESSAGE", event);
-
             let remoteState = JSON.parse(event.data);
 
             if (!otherGameStates[this.remote]) {
@@ -190,6 +160,7 @@ class Rtc {
             otherGameStates[this.remote].ship._angle = remoteState.ship._angle;
             otherGameStates[this.remote].ship._length = remoteState.ship._length;
             otherGameStates[this.remote].ship._width = remoteState.ship._width;
+            otherGameStates[this.remote].ship._health = remoteState.ship._health;
 
             otherGameStates[this.remote].debris = remoteState.debris.map(x => new NetworkParticle(x.x, x.y));
             otherGameStates[this.remote].cannonBalls = remoteState.cannonBalls.map(x => new NetworkParticle(x.x, x.y));

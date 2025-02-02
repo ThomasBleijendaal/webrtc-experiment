@@ -14,6 +14,14 @@
             text-align: center;
         }
 
+        p {
+            font-size: 12px;
+            width: 300px;
+            display: block;
+            margin: 20px auto;
+            color: white;
+        }
+
         #game {
             display: block;
             margin: 0px auto;
@@ -23,11 +31,15 @@
 </head>
 <body>
     <h1>Masts of Mayhem</h1>
-    <canvas id="game" width="1440" height="900"></canvas>
+    <canvas id="game" width="600" height="600"></canvas>
+
+    <p>Use arrows to navigate. Use A and D to fire cannons. Spend coins to upgrade: Use Q to get more cannons. Use W to get more boat. Use E to repair.</p>
+    <p>Traversing to other side of the sea is costly.</p>
 
     <script src="./networking.js"></script>
     <script src="./classes.js"></script>
     <script src="./rendering.js"></script>
+    <script src="./audio.js"></script>
     <script src="./game.js"></script>
 </body>
 </html>
