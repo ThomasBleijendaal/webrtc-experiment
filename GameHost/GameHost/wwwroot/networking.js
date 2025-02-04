@@ -40,7 +40,10 @@ class RtcsManager {
             } else if (message.type === "answer") {
 
                 if (this.peers[from]) {
-                    if (!this.peers[from].isConnected()) {
+                    if (this.peers[from].isConnected()) {
+                        console.log("ALREADY KNOWN", from);
+                    }
+                    else {
                         this.peers[from].handleRemote(message.type, message.content);
                     }
                 }
@@ -51,6 +54,7 @@ class RtcsManager {
 
                 if (candidate) {
                     if (this.peers[from]) {
+                        console.log("CANDIDATE", from, message.content);
                         this.peers[from].addCandicate(message.content);
                     }
                 }
@@ -155,6 +159,7 @@ class Rtc {
             }
 
             otherGameStates[this.remote].ship.color = remoteState.ship.color;
+            otherGameStates[this.remote].ship.name = remoteState.ship.name;
             otherGameStates[this.remote].ship.x = remoteState.ship.x;
             otherGameStates[this.remote].ship.y = remoteState.ship.y;
             otherGameStates[this.remote].ship._angle = remoteState.ship._angle;
@@ -195,10 +200,9 @@ class Rtc {
                 this.dataChannel.send(networkGameState);
             }
             catch {
-                console.log(this.dataChannel);
+                //console.log(this.dataChannel);
                 RtcsManager.remove(this.pc.remote);
             }
         }
     }
 }
-

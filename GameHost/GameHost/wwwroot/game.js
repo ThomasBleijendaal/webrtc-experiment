@@ -50,6 +50,7 @@ function spawnDebris() {
 function prepareState() {
     let state = new NetworkState();
     state.ship.color = ship.color;
+    state.ship.name = ship.name;
     state.ship.x = ship.x;
     state.ship.y = ship.y;
     state.ship._angle = ship.angle();
@@ -82,6 +83,12 @@ let fireCannonTick = false;
 let firingPortCannons = false;
 let firingStarboardCannons = false;
 
+let nameInput = document.querySelector("#name");
+
+nameInput.onchange = (event) => {
+    ship.name = nameInput.value;
+};
+
 window.onkeydown = (event) => {
     AudioManager.init();
 
@@ -103,11 +110,9 @@ window.onkeydown = (event) => {
     }
     if (event.code === "KeyA") {
         firingPortCannons = true;
-        event.preventDefault();
     }
     else if (event.code === "KeyS") {
         firingStarboardCannons = true;
-        event.preventDefault();
     }
 }
 window.onkeyup = (event) => {
@@ -143,11 +148,9 @@ window.onkeyup = (event) => {
     }
     if (event.code === "KeyA") {
         firingPortCannons = false;
-        event.preventDefault();
     }
     if (event.code === "KeyS") {
         firingStarboardCannons = false;
-        event.preventDefault();
     }
 }
 

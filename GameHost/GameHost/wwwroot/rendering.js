@@ -64,10 +64,12 @@ function drawShip(ship, cannonBalls, otherShips) {
 
     ctx.rotate(-shipAngle);
 
-    ctx.font = '10px Arial';
+    ctx.font = '12px monospace';
     ctx.fillStyle = 'white';
-    ctx.fillText(`${Math.floor(ship.health() * 100)}%`, -12, -20);
+    ctx.fillText(`${Math.floor(ship.health() * 100)}%`, -14, -14);
 
+    let nameLength = ship.name.length;
+    ctx.fillText(ship.name, -3.2 * nameLength, 24);
 
     ctx.translate(-ship.x, -ship.y);
 

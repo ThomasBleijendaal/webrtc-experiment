@@ -17,6 +17,7 @@ class NetworkParticle {
 
 class NetworkShip extends NetworkParticle {
     color = "red";
+    name = `P${Math.floor(Math.random() * 100)}`
 
     _angle = 0;
     _length = 0;
