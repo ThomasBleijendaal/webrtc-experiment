@@ -39,7 +39,7 @@ class NetworkShip extends NetworkParticle {
 }
 
 class Ship extends NetworkShip {
-    color = `#${Math.floor(Math.random() * 80 + 10)}${Math.floor(Math.random() * 50 + 10)}00`;
+    color = "red";
 
     direction = 0;
     speed = 0;
@@ -68,6 +68,21 @@ class Ship extends NetworkShip {
     }
     maxHealth = function () {
         return this.masts * 2;
+    }
+
+    reset = function () {
+        this.color = `#${Math.floor(Math.random() * 80 + 10)}${Math.floor(Math.random() * 50 + 10)}00`;
+
+        this.x = 0.9 * Math.random() * width + 10;
+        this.y = 0.9 * Math.random() * height + 10;
+        this.direction = ((ship.x > width / 2) ? 270 : 90) + ((ship.y > height / 2) ? 90 : 0);
+
+        this.speed = 0;
+        this.masts = 1;
+        this.cannons = 4;
+        this.loadedCannons = 0;
+        this.healthRemaining = 2;
+        this.upgrades = 2;
     }
 }
 

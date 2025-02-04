@@ -28,11 +28,14 @@ class RtcsManager {
 
                 newPeer.createOffer();
 
+                console.log("JOIN", from);
+
                 this.peers[from] = newPeer;
 
             } else if (message.type === "offer") {
 
                 if (!this.peers[from]) {
+                    console.log("OFFER", from);
                     this.peers[from] = new Rtc(this.ws, from, this.id);
                     this.peers[from].handleRemote(message.type, message.content);
                 }
@@ -67,7 +70,9 @@ class RtcsManager {
     }
 
     static remove = function (peerId) {
-        this.peers[peerId] = null;
+        if (peerId) {
+            this.peers[peerId] = null;
+        }
     }
 
     static sendState = function () {
@@ -100,14 +105,17 @@ class Rtc {
         this.ws = ws;
 
         this.pc.onicecandidate = (event) => {
+            console.log("ICE", event);
             if (event.type === "icecandidate" && event.candidate) {
                 this.ws.send(createMessage("candidate", this.local, this.remote, event.candidate));
             }
         };
 
         this.pc.onconnectionstatechange = (event) => {
-            if (this.pc.connectionState == "closed" || this.pc.connectionState == "failed") {
-                RtcsManager.remove(this.pc.remote);
+            console.log("CONNECTION CHANGE", event, this.pc.connectionState);
+
+            if (this.pc.connectionState == "closed" || this.pc.connectionState == "failed" || this.pc.connectionState == "disconnected") {
+                RtcsManager.remove(this.remote);
             }
         };
 
@@ -183,6 +191,10 @@ class Rtc {
                     else if (event == hitEvent) {
                         AudioManager.playHit(distance);
                     }
+                    else if (event == explodeEvent) {
+                        AudioManager.playExplode(distance);
+                        ship.upgrades++;
+                    }
                 }
             }
         };
@@ -200,7 +212,6 @@ class Rtc {
                 this.dataChannel.send(networkGameState);
             }
             catch {
-                //console.log(this.dataChannel);
                 RtcsManager.remove(this.pc.remote);
             }
         }

@@ -103,9 +103,9 @@ function drawUpgrades(ship) {
     ctx.arc(0, 0, 20, 0, 2 * Math.PI);
     ctx.fill();
 
-    ctx.font = '15px Arial';
+    ctx.font = '15px monospace';
     ctx.fillStyle = 'black';
-    ctx.fillText(ship.upgrades, -4, 4);
+    ctx.fillText(ship.upgrades, ship.upgrades > 9 ? -8 : -4, 4);
 
     ctx.translate(-width + 20, -20);
 }
@@ -136,7 +136,11 @@ function drawCannonBall(cannonBall) {
 
 function drawFrame() {
     drawSea();
-    drawHighlight(ship);
+    if (ship.healthRemaining > 0) {
+        drawHighlight(ship);
+    }
+
+    drawUpgrades(ship);
 
     for (let d of debris.entries()) {
         drawDebris(d[0], ship);
@@ -154,7 +158,7 @@ function drawFrame() {
         }
     }
 
-    for (let remoteState of Object.values(otherGameStates)) {
+    for (let [id, remoteState] of Object.entries(otherGameStates)) {
         if (remoteState.debris) {
             for (let d of remoteState.debris) {
                 drawDebris(d, remoteState.ship);
@@ -167,17 +171,22 @@ function drawFrame() {
             }
         }
 
-        if (remoteState.ship) {
+        if (remoteState.ship && remoteState.ship.health() > 0) {
             drawShip(remoteState.ship, [], []);
         };
+
+        
+        if (!RtcsManager.peers[id]) {
+            delete otherGameStates[id];
+        }
     }
 
-    drawUpgrades(ship);
+    if (ship.healthRemaining > 0) {
+        let gameStates = Object.values(otherGameStates);
 
-    let gameStates = Object.values(otherGameStates);
-
-    let hits = drawShip(ship,
-        gameStates.flatMap(x => x.cannonBalls),
-        gameStates.map(x => x.ship));
-    handleDamage(hits);
+        let hits = drawShip(ship,
+            gameStates.flatMap(x => x.cannonBalls),
+            gameStates.map(x => x.ship));
+        handleDamage(hits);
+    }
 }

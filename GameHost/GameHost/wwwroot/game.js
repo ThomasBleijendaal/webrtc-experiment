@@ -4,14 +4,15 @@ const ctx = canvas.getContext("2d");
 const width = canvas.width;
 const height = canvas.height;
 
-const ship = new Ship(0.9 * Math.random() * width + 10, 0.9 * Math.random() * height + 10);
-ship.direction = ((ship.x > width / 2) ? 270 : 90) + ((ship.y > height / 2) ? 90 : 0)
+const ship = new Ship();
+ship.reset();
 
 const debris = new Set();
 const cannonBalls = new Set();
 const events = new Set();
 const cannonFireEvent = 1;
 const hitEvent = 2;
+const explodeEvent = 3;
 
 // TODO: remove state of clients that are gone
 const otherGameStates = {};
@@ -92,65 +93,72 @@ nameInput.onchange = (event) => {
 window.onkeydown = (event) => {
     AudioManager.init();
 
-    if (event.code === "ArrowUp") {
-        accelerate = true;
-        event.preventDefault();
-    }
-    if (event.code === "ArrowLeft") {
-        port = true;
-        event.preventDefault();
-    }
-    if (event.code === "ArrowRight") {
-        starboard = true;
-        event.preventDefault();
-    }
-    if (event.code === "ArrowDown") {
-        decelerate = true;
-        event.preventDefault();
-    }
-    if (event.code === "KeyA") {
-        firingPortCannons = true;
-    }
-    else if (event.code === "KeyS") {
-        firingStarboardCannons = true;
+    if (ship.healthRemaining > 0) {
+        if (event.code === "ArrowUp") {
+            accelerate = true;
+            event.preventDefault();
+        }
+        if (event.code === "ArrowLeft") {
+            port = true;
+            event.preventDefault();
+        }
+        if (event.code === "ArrowRight") {
+            starboard = true;
+            event.preventDefault();
+        }
+        if (event.code === "ArrowDown") {
+            decelerate = true;
+            event.preventDefault();
+        }
+        if (event.code === "KeyA") {
+            firingPortCannons = true;
+        }
+        else if (event.code === "KeyS") {
+            firingStarboardCannons = true;
+        }
     }
 }
 window.onkeyup = (event) => {
-    if (event.code === "ArrowUp") {
-        accelerate = false;
-    }
-    if (event.code === "ArrowLeft") {
-        port = false;
-    }
-    if (event.code === "ArrowRight") {
-        starboard = false;
-    }
-    if (event.code === "ArrowDown") {
-        decelerate = false;
-    }
-    if (event.code === "KeyQ") {
-        if (ship.upgrades > 0) {
-            ship.cannons += 2;
-            ship.upgrades--;
+    if (ship.healthRemaining > 0) {
+        if (event.code === "ArrowUp") {
+            accelerate = false;
+        }
+        if (event.code === "ArrowLeft") {
+            port = false;
+        }
+        if (event.code === "ArrowRight") {
+            starboard = false;
+        }
+        if (event.code === "ArrowDown") {
+            decelerate = false;
+        }
+        if (event.code === "KeyQ") {
+            if (ship.upgrades > 0) {
+                ship.cannons += 2;
+                ship.upgrades--;
+            }
+        }
+        if (event.code === "KeyW") {
+            if (ship.upgrades > 0) {
+                ship.masts += 1;
+                ship.upgrades--;
+            }
+        }
+        if (event.code === "KeyE") {
+            if (ship.upgrades > 0) {
+                ship.healthRemaining = ship.maxHealth();
+                ship.upgrades--;
+            }
+        }
+        if (event.code === "KeyA") {
+            firingPortCannons = false;
+        }
+        if (event.code === "KeyS") {
+            firingStarboardCannons = false;
         }
     }
-    if (event.code === "KeyW") {
-        if (ship.upgrades > 0) {
-            ship.masts += 1;
-            ship.upgrades--;
-        }
-    }
-    if (event.code === "KeyE") {
-        if (ship.upgrades > 0) {
-            ship.healthRemaining = ship.maxHealth();
-            ship.upgrades--;
-        }
-    }
-    if (event.code === "KeyA") {
-        firingPortCannons = false;
-    }
-    if (event.code === "KeyS") {
-        firingStarboardCannons = false;
+    else if (event.code === "KeyR") {
+        ship.reset();
     }
 }
 
@@ -189,6 +197,27 @@ function handleDamage(hits) {
         AudioManager.playHit(1);
 
         events.add(hitEvent);
+    }
+
+    if (ship.healthRemaining <= 0) {
+        AudioManager.playExplode(1);
+
+        for (let i = 0; i < 25; i++) {
+            spawnDebris();
+        }
+
+        events.add(explodeEvent);
+
+        ship.speed = 0;
+        ship.x = -100;
+        ship.y = -100;
+
+        accelerate = false;
+        decelerate = false;
+        port = false;
+        starboard = false;
+        firingPortCannons = false;
+        firingStarboardCannons = false;
     }
 }
 
