@@ -32,15 +32,23 @@ function fireCannon(starboard) {
 
     let dx = (0.5 - Math.random()) * length * Math.sin(angle);
     let dy = (0.5 - Math.random()) * length * -Math.cos(angle);
+    let ballDirection = ship.direction + (starboard ? 90 : -90);
+    let ballAngle = ballDirection * Math.PI / 180.0
 
-    cannonBalls.add(new CannonBall(
-        ship.x + dx,
-        ship.y + dy,
-        ship.direction + (starboard ? 90 : -90)
-    ));
+    let sdx = ship.width() / 2 * Math.sin(ballAngle);
+    let sdy = ship.width() / 2 * -Math.cos(ballAngle);
+
+    let newBall = new CannonBall(
+        ship.x + dx + sdx,
+        ship.y + dy + sdy,
+        ballDirection
+    );
+
+    cannonBalls.add(newBall);
+
     smoke.add(new Smoke(
-        ship.x + dx,
-        ship.y + dy
+        newBall.x,
+        newBall.y
     ));
 
     AudioManager.playCannonFire(1);
@@ -48,9 +56,15 @@ function fireCannon(starboard) {
 }
 
 function spawnDebris() {
+    let length = Math.random() * 30;
+    let direction = Math.random() * 2 * Math.PI;
+
+    let dx = length * Math.sin(direction);
+    let dy = length * -Math.cos(direction);
+
     debris.add(new Debris(
-        ship.x + (30 * (0.5 - Math.random())),
-        ship.y + (30 * (0.5 - Math.random()))));
+        ship.x + dx,
+        ship.y + dy));
 }
 
 function prepareState() {

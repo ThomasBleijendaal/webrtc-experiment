@@ -138,27 +138,37 @@ function drawSmoke(smoke) {
     let r1 = smoke.x % 4;
     let r2 = smoke.y % 5;
 
+    let radius = (smoke.age < 5)
+        ? 2.5 + (smoke.age) 
+        : 5 + (smoke.age / 2);
+
     ctx.beginPath();
-    ctx.fillStyle = "silver";
-    ctx.globalAlpha = Math.max(0, 0.5 - (smoke.age / 100.0));
+    if (smoke.age <= 1) {
+        ctx.fillStyle = "#ffeedd";
+        ctx.globalAlpha = 1;
+    }
+    else {
+        ctx.fillStyle = "silver";
+        ctx.globalAlpha = Math.max(0, 0.5 - (smoke.age / 100.0));
+    }
 
     ctx.translate(smoke.x, smoke.y);
 
-    ctx.arc(0, 0, 5 + (smoke.age / 2), 0, 2 * Math.PI)
+    ctx.arc(0, 0, radius, 0, 2 * Math.PI)
     ctx.fill();
 
     ctx.translate(-smoke.x, -smoke.y);
 
     ctx.translate(smoke.x - r1, smoke.y + r2);
 
-    ctx.arc(0, 0, 5 + (smoke.age / 2), 0, 2 * Math.PI)
+    ctx.arc(0, 0, radius, 0, 2 * Math.PI)
     ctx.fill();
 
     ctx.translate(-smoke.x + r1, -smoke.y - r2);
 
     ctx.translate(smoke.x + r2, smoke.y);
 
-    ctx.arc(0, 0, 5 + (smoke.age / 2), 0, 2 * Math.PI)
+    ctx.arc(0, 0, radius, 0, 2 * Math.PI)
     ctx.fill();
 
     ctx.translate(-smoke.x - r2, -smoke.y);

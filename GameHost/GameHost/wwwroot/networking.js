@@ -162,8 +162,6 @@ class Rtc {
         this.dataChannel.onmessage = (event) => {
             let remoteState = JSON.parse(event.data);
 
-            console.log(remoteState);
-
             if (!otherGameStates[this.remote]) {
                 otherGameStates[this.remote] = new NetworkState();
             }
