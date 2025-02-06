@@ -134,6 +134,39 @@ function drawCannonBall(cannonBall) {
     ctx.translate(-cannonBall.x, -cannonBall.y);
 }
 
+function drawSmoke(smoke) {
+    let r1 = smoke.x % 4;
+    let r2 = smoke.y % 5;
+
+    ctx.beginPath();
+    ctx.fillStyle = "silver";
+    ctx.globalAlpha = Math.max(0, 0.5 - (smoke.age / 100.0));
+
+    ctx.translate(smoke.x, smoke.y);
+
+    ctx.arc(0, 0, 5 + (smoke.age / 2), 0, 2 * Math.PI)
+    ctx.fill();
+
+    ctx.translate(-smoke.x, -smoke.y);
+
+    ctx.translate(smoke.x - r1, smoke.y + r2);
+
+    ctx.arc(0, 0, 5 + (smoke.age / 2), 0, 2 * Math.PI)
+    ctx.fill();
+
+    ctx.translate(-smoke.x + r1, -smoke.y - r2);
+
+    ctx.translate(smoke.x + r2, smoke.y);
+
+    ctx.arc(0, 0, 5 + (smoke.age / 2), 0, 2 * Math.PI)
+    ctx.fill();
+
+    ctx.translate(-smoke.x - r2, -smoke.y);
+
+
+    ctx.globalAlpha = 1.0;
+}
+
 function drawFrame() {
     drawSea();
     if (ship.healthRemaining > 0) {
@@ -188,5 +221,21 @@ function drawFrame() {
             gameStates.flatMap(x => x.cannonBalls),
             gameStates.map(x => x.ship));
         handleDamage(hits);
+    }
+
+    for (let s of smoke.entries()) {
+        drawSmoke(s[0]);
+
+        if (s[0].age >= 95) {
+            smoke.delete(s[0]);
+        }
+    }
+
+    for (let [id, remoteState] of Object.entries(otherGameStates)) {
+        if (remoteState.smoke) {
+            for (let s of remoteState.smoke) {
+                drawSmoke(s);
+            }
+        }
     }
 }

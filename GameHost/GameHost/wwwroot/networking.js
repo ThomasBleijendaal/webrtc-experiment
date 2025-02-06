@@ -162,6 +162,8 @@ class Rtc {
         this.dataChannel.onmessage = (event) => {
             let remoteState = JSON.parse(event.data);
 
+            console.log(remoteState);
+
             if (!otherGameStates[this.remote]) {
                 otherGameStates[this.remote] = new NetworkState();
             }
@@ -177,6 +179,7 @@ class Rtc {
 
             otherGameStates[this.remote].debris = remoteState.debris.map(x => new NetworkParticle(x.x, x.y));
             otherGameStates[this.remote].cannonBalls = remoteState.cannonBalls.map(x => new NetworkParticle(x.x, x.y));
+            otherGameStates[this.remote].smoke = remoteState.smoke.map(x => new Smoke(x.x, x.y, x.age));
             otherGameStates[this.remote].events = remoteState.events;
 
             if (remoteState.events.length > 0) {

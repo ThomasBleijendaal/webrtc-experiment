@@ -9,6 +9,7 @@ ship.reset();
 
 const debris = new Set();
 const cannonBalls = new Set();
+const smoke = new Set();
 const events = new Set();
 const cannonFireEvent = 1;
 const hitEvent = 2;
@@ -37,6 +38,10 @@ function fireCannon(starboard) {
         ship.y + dy,
         ship.direction + (starboard ? 90 : -90)
     ));
+    smoke.add(new Smoke(
+        ship.x + dx,
+        ship.y + dy
+    ));
 
     AudioManager.playCannonFire(1);
     events.add(cannonFireEvent);
@@ -61,6 +66,7 @@ function prepareState() {
 
     state.debris = [...debris].map(x => new NetworkParticle(x.x, x.y));
     state.cannonBalls = [...cannonBalls].map(x => new NetworkParticle(x.x, x.y));
+    state.smoke = [...smoke];
     state.events = [...events];
 
     networkGameState = JSON.stringify(state);
@@ -162,18 +168,18 @@ window.onkeyup = (event) => {
     }
 }
 
-function handleInputs() {
+function handleInputs(fpsFactor) {
     if (accelerate && ship.speed < ship.maxSpeed()) {
-        ship.speed += 0.01 + (.005 * ship.masts);
+        ship.speed += fpsFactor * 0.01 + (.005 * ship.masts);
     }
     if (port) {
-        ship.direction -= 0.1 + (ship.speed / ship.maxSpeed()) * (1.0 + (ship.masts * 0.1));
+        ship.direction -= fpsFactor * (0.1 + (ship.speed / ship.maxSpeed()) * (1.0 + (ship.masts * 0.1)));
     }
     if (starboard) {
-        ship.direction += 0.1 + (ship.speed / ship.maxSpeed()) * (1.0 + (ship.masts * 0.1));
+        ship.direction += fpsFactor * (0.1 + (ship.speed / ship.maxSpeed()) * (1.0 + (ship.masts * 0.1)));
     }
     if (decelerate && ship.speed > 0) {
-        ship.speed -= .01;
+        ship.speed -= fpsFactor * .01;
     }
     if (fireCannonTick && firingPortCannons && ship.loadedCannons > 0) {
         fireCannon(false);
@@ -221,12 +227,12 @@ function handleDamage(hits) {
     }
 }
 
-function handleState() {
+function handleState(fpsFactor) {
     if (ship.speed > 0) {
         let angle = ship.angle();
 
-        let dx = ship.speed * Math.sin(angle);
-        let dy = ship.speed * -Math.cos(angle);
+        let dx = fpsFactor * ship.speed * Math.sin(angle);
+        let dy = fpsFactor * ship.speed * -Math.cos(angle);
 
         ship.x += dx;
         ship.y += dy;
@@ -251,12 +257,12 @@ function handleState() {
     for (let b of cannonBalls.entries()) {
         let angle = b[0].angle();
 
-        let dx = 2.0 * Math.sin(angle);
-        let dy = 2.0 * -Math.cos(angle);
+        let dx = fpsFactor * 2.0 * Math.sin(angle);
+        let dy = fpsFactor * 2.0 * -Math.cos(angle);
 
         b[0].x += dx;
         b[0].y += dy;
-        b[0].age += 1;
+        b[0].age += fpsFactor;
 
         if (b[0].x < -30) {
             b[0].x = height + 29;
@@ -270,6 +276,9 @@ function handleState() {
         if (b[0].y > width + 30) {
             b[0].y = -29;
         }
+    }
+    for (let s of smoke.entries()) {
+        s[0].age += .1 * fpsFactor;
     }
 }
 
@@ -286,6 +295,11 @@ function gameLoop(timeStamp) {
 
     // Calculate fps
     fps = Math.round(1 / secondsPassed);
+    if (fps == 0) {
+        fps = 1;
+    }
+
+    let fpsFactor = Math.max(0.1, Math.min(3.0, 60.0 / fps));
 
     if (++reloadTick > fps) {
         reloadTick = 0;
@@ -297,8 +311,8 @@ function gameLoop(timeStamp) {
         fireCannonTick = true;
     }
 
-    handleInputs();
-    handleState();
+    handleInputs(fpsFactor);
+    handleState(fpsFactor);
 
     drawFrame();
 

@@ -2,6 +2,7 @@ class NetworkState {
     ship = new NetworkShip();
     debris = [];
     cannonBalls = [];
+    smoke = [];
     events = [];
 }
 
@@ -101,5 +102,14 @@ class CannonBall extends NetworkParticle {
 
     angle = function () {
         return this.direction * Math.PI / 180.0;
+    }
+}
+
+class Smoke extends NetworkParticle {
+    age = 0;
+
+    constructor(x, y, age) {
+        super(x, y);
+        this.age = age ?? 0;
     }
 }
