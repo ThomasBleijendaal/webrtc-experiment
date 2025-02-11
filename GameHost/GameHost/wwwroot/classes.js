@@ -93,11 +93,13 @@ class Debris extends NetworkParticle {
 class CannonBall extends NetworkParticle {
     direction = 0;
     age = 0;
+    maxAge = 0;
 
-    constructor(x, y, direction) {
+    constructor(x, y, direction, maxAge) {
         super(x, y);
 
         this.direction = direction;
+        this.maxAge = maxAge;
     }
 
     angle = function () {

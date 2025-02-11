@@ -32,7 +32,7 @@ function fireCannon(starboard) {
 
     let dx = (0.5 - Math.random()) * length * Math.sin(angle);
     let dy = (0.5 - Math.random()) * length * -Math.cos(angle);
-    let ballDirection = ship.direction + (starboard ? 90 : -90);
+    let ballDirection = ship.direction + (starboard ? 90 : -90) + (10 * (0.5 - Math.random()));
     let ballAngle = ballDirection * Math.PI / 180.0
 
     let sdx = ship.width() / 2 * Math.sin(ballAngle);
@@ -41,7 +41,8 @@ function fireCannon(starboard) {
     let newBall = new CannonBall(
         ship.x + dx + sdx,
         ship.y + dy + sdy,
-        ballDirection
+        ballDirection,
+        50 + (150 * Math.random())
     );
 
     cannonBalls.add(newBall);
@@ -252,18 +253,18 @@ function handleState(fpsFactor) {
         ship.y += dy;
 
         if (ship.x < -30) {
-            ship.x = height + 29;
+            ship.x = width + 29;
             handleDamage(10);
         }
-        if (ship.x > height + 30) {
+        if (ship.x > width + 30) {
             ship.x = -29;
             handleDamage(10);
         }
         if (ship.y < -30) {
-            ship.y = width + 29;
+            ship.y = height + 29;
             handleDamage(10);
         }
-        if (ship.y > width + 30) {
+        if (ship.y > height + 30) {
             ship.y = -29;
             handleDamage(10);
         }
@@ -279,15 +280,15 @@ function handleState(fpsFactor) {
         b[0].age += fpsFactor;
 
         if (b[0].x < -30) {
-            b[0].x = height + 29;
+            b[0].x = width + 29;
         }
-        if (b[0].x > height + 30) {
+        if (b[0].x > width + 30) {
             b[0].x = -29;
         }
         if (b[0].y < -30) {
-            b[0].y = width + 29;
+            b[0].y = height + 29;
         }
-        if (b[0].y > width + 30) {
+        if (b[0].y > height + 30) {
             b[0].y = -29;
         }
     }

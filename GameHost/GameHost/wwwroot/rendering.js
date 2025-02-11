@@ -196,7 +196,7 @@ function drawFrame() {
     for (let b of cannonBalls.entries()) {
         drawCannonBall(b[0]);
 
-        if (b[0].age > 200) {
+        if (b[0].age > b[0].maxAge) {
             cannonBalls.delete(b[0]);
         }
     }
