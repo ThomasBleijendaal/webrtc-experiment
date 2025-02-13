@@ -50,7 +50,7 @@ class AudioManager {
 
         gain.gain.value = Math.max(0, 1.0 - (distance / width / 4.0));
         if (distance > 1) {
-            trackSource.detune.value += -1200.0 * (distance / (width / 3));
+            trackSource.detune.value += -1200.0 * (distance / (width / 5.0));
             gain.gain.value /= 2.0;
         }
 

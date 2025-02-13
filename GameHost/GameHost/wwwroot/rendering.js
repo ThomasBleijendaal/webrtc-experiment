@@ -149,7 +149,7 @@ function drawSmoke(smoke) {
     }
     else {
         ctx.fillStyle = "silver";
-        ctx.globalAlpha = Math.max(0, 0.5 - (smoke.age / 100.0));
+        ctx.globalAlpha = Math.max(0, 0.5 - (smoke.age / 200.0));
     }
 
     ctx.translate(smoke.x, smoke.y);
@@ -172,7 +172,6 @@ function drawSmoke(smoke) {
     ctx.fill();
 
     ctx.translate(-smoke.x - r2, -smoke.y);
-
 
     ctx.globalAlpha = 1.0;
 }

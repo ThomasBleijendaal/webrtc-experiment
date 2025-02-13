@@ -15,7 +15,6 @@ const cannonFireEvent = 1;
 const hitEvent = 2;
 const explodeEvent = 3;
 
-// TODO: remove state of clients that are gone
 const otherGameStates = {};
 
 let networkGameState = "";
@@ -87,8 +86,6 @@ function prepareState() {
     networkGameState = JSON.stringify(state);
 
     events.clear();
-
-    //console.log(networkGameState);
 }
 
 function receiveState(id, state) {
