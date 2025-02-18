@@ -3,6 +3,7 @@ class NetworkState {
     debris = [];
     cannonBalls = [];
     smoke = [];
+    trail = [];
     events = [];
 }
 
@@ -108,6 +109,15 @@ class CannonBall extends NetworkParticle {
 }
 
 class Smoke extends NetworkParticle {
+    age = 0;
+
+    constructor(x, y, age) {
+        super(x, y);
+        this.age = age ?? 0;
+    }
+}
+
+class Trail extends NetworkParticle {
     age = 0;
 
     constructor(x, y, age) {

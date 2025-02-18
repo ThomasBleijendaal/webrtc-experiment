@@ -10,6 +10,7 @@ ship.reset();
 const debris = new Set();
 const cannonBalls = new Set();
 const smoke = new Set();
+const trail = new Set();
 const events = new Set();
 const cannonFireEvent = 1;
 const hitEvent = 2;
@@ -55,6 +56,10 @@ function fireCannon(starboard) {
     events.add(cannonFireEvent);
 }
 
+function addTrail() {
+    trail.add(new Trail(ship.x, ship.y, 0));
+}
+
 function spawnDebris() {
     let length = Math.random() * 30;
     let direction = Math.random() * 2 * Math.PI;
@@ -81,6 +86,7 @@ function prepareState() {
     state.debris = [...debris].map(x => new NetworkParticle(x.x, x.y));
     state.cannonBalls = [...cannonBalls].map(x => new NetworkParticle(x.x, x.y));
     state.smoke = [...smoke];
+    state.trail = [...trail];
     state.events = [...events];
 
     networkGameState = JSON.stringify(state);
@@ -101,6 +107,7 @@ let starboard = false;
 let fireCannonTick = false;
 let firingPortCannons = false;
 let firingStarboardCannons = false;
+let addTrailTick = false;
 
 let nameInput = document.querySelector("#name");
 
@@ -201,6 +208,9 @@ function handleInputs(fpsFactor) {
         fireCannon(true);
         ship.loadedCannons -= 1;
     }
+    if (addTrailTick) {
+        addTrail();
+    }
 }
 
 function handleDamage(hits) {
@@ -292,6 +302,9 @@ function handleState(fpsFactor) {
     for (let s of smoke.entries()) {
         s[0].age += .1 * fpsFactor;
     }
+    for (let t of trail.entries()) {
+        t[0].age += .1 * fpsFactor;
+    }
 }
 
 let secondsPassed;
@@ -300,15 +313,24 @@ let fps;
 
 let reloadTick = 0;
 let fireTick = 0;
+let trailTick = 0;
+
+let showFps = false;
+let fpss = [];
 
 function gameLoop(timeStamp) {
-    secondsPassed = (timeStamp - oldTimeStamp) / 1000;
+    secondsPassed = (timeStamp - oldTimeStamp) / 1000.0;
     oldTimeStamp = timeStamp;
 
     // Calculate fps
-    fps = Math.round(1 / secondsPassed);
+    fps = Math.round(1.0 / secondsPassed);
     if (fps == 0) {
         fps = 1;
+    }
+
+    fpss.push(fps);
+    while (fpss.length > 100) {
+        fpss.shift();
     }
 
     let fpsFactor = Math.max(0.1, Math.min(3.0, 60.0 / fps));
@@ -322,17 +344,30 @@ function gameLoop(timeStamp) {
         fireTick = 0;
         fireCannonTick = true;
     }
+    addTrailTick = false;
+    if (ship.speed > 0 && ++trailTick > (fps / ship.speed / 4)) {
+        trailTick = 0;
+        addTrailTick = true;
+    }
 
     handleInputs(fpsFactor);
     handleState(fpsFactor);
 
     drawFrame();
 
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, 50, 20);
-    ctx.font = '10px Arial';
-    ctx.fillStyle = 'black';
-    ctx.fillText("FPS: " + fps, 5, 12);
+    if (showFps) {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 50, 20);
+        ctx.font = '10px Arial';
+        ctx.fillStyle = 'black';
+        ctx.fillText("FPS: " + fps, 5, 12);
+
+        let i = 0;
+        ctx.fillStyle = 'black';
+        for (let f of fpss) {
+            ctx.fillRect(++i, 200 - f, 1, 1);
+        }
+    }
 
     prepareState();
     RtcsManager.sendState();

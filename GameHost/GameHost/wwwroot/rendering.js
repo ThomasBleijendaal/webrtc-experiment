@@ -148,7 +148,8 @@ function drawSmoke(smoke) {
         ctx.globalAlpha = 1;
     }
     else {
-        ctx.fillStyle = "silver";
+        let color = `#c${Math.ceil(r1)}c${Math.ceil(r2)}c${Math.ceil(r1+r2)}`;
+        ctx.fillStyle = color;
         ctx.globalAlpha = Math.max(0, 0.5 - (smoke.age / 200.0));
     }
 
@@ -161,6 +162,7 @@ function drawSmoke(smoke) {
 
     ctx.translate(smoke.x - r1, smoke.y + r2);
 
+    ctx.beginPath();
     ctx.arc(0, 0, radius, 0, 2 * Math.PI)
     ctx.fill();
 
@@ -168,11 +170,28 @@ function drawSmoke(smoke) {
 
     ctx.translate(smoke.x + r2, smoke.y);
 
+    ctx.beginPath();
     ctx.arc(0, 0, radius, 0, 2 * Math.PI)
     ctx.fill();
 
     ctx.translate(-smoke.x - r2, -smoke.y);
+    ctx.globalAlpha = 1.0;
+}
 
+function drawTrail(trail, ship) {
+    let r = (ship.width() / 2) + trail.age;
+
+    ctx.beginPath();
+
+    ctx.translate(trail.x, trail.y);
+
+    ctx.fillStyle = `#a0c0ff`;
+    ctx.globalAlpha = Math.max(0, 0.5 - (trail.age / 20.0));
+
+    ctx.arc(0, 0, r, 0, 2 * Math.PI)
+    ctx.fill();
+
+    ctx.translate(-trail.x, -trail.y);
     ctx.globalAlpha = 1.0;
 }
 
@@ -183,6 +202,14 @@ function drawFrame() {
     }
 
     drawUpgrades(ship);
+
+    for (let t of trail.entries()) {
+        drawTrail(t[0], ship);
+
+        if (t[0].age > 10) {
+            trail.delete(t[0]);
+        }
+    }
 
     for (let d of debris.entries()) {
         drawDebris(d[0], ship);
@@ -210,6 +237,12 @@ function drawFrame() {
         if (remoteState.cannonBalls) {
             for (let b of remoteState.cannonBalls) {
                 drawCannonBall(b);
+            }
+        }
+
+        if (remoteState.trail) {
+            for (let t of remoteState.trail) {
+                drawTrail(t, remoteState.ship);
             }
         }
 
