@@ -1,5 +1,5 @@
 const canvas = document.querySelector("#game");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", { alpha: false });
 
 const width = canvas.width;
 const height = canvas.height;
@@ -340,7 +340,7 @@ function gameLoop(timeStamp) {
         loadCannon();
     }
     fireCannonTick = false;
-    if (++fireTick > fps / ship.cannons / 2) {
+    if (++fireTick > 1) {
         fireTick = 0;
         fireCannonTick = true;
     }

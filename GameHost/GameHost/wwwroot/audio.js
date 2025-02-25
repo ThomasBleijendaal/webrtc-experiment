@@ -1,5 +1,4 @@
-﻿
-class AudioManager {
+﻿class AudioManager {
     static {
     }
 

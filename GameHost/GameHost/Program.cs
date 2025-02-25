@@ -25,4 +25,4 @@ app.Map("/ws", async (HttpContext context, WebSocketHandler handler, Cancellatio
     }
 });
 
-app.Run();
+await app.RunAsync();
