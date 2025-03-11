@@ -75,8 +75,12 @@ class Ship extends NetworkShip {
     reset = function () {
         this.color = `#${Math.floor(Math.random() * 80 + 10)}${Math.floor(Math.random() * 50 + 10)}00`;
 
-        this.x = 0.9 * Math.random() * width + 10;
-        this.y = 0.9 * Math.random() * height + 10;
+        do {
+            this.x = (0.9 * Math.random() * width) + 100;
+            this.y = (0.9 * Math.random() * height) + 100;
+        }
+        while (getDepth(this.x, this.y) > -1);
+
         this.direction = ((ship.x > width / 2) ? 270 : 90) + ((ship.y > height / 2) ? 90 : 0);
 
         this.speed = 0;

@@ -1,5 +1,7 @@
 const canvas = document.querySelector("#game");
-const ctx = canvas.getContext("2d", { alpha: false });
+const ctx = canvas.getContext("2d");
+const terrainCanvas = document.querySelector("#terrain");
+const terrainCtx = terrainCanvas.getContext("2d", { alpha: false });
 
 const width = canvas.width;
 const height = canvas.height;
@@ -143,6 +145,7 @@ window.onkeydown = (event) => {
         }
     }
 }
+
 window.onkeyup = (event) => {
     if (ship.healthRemaining > 0) {
         if (event.code === "ArrowUp") {
@@ -218,13 +221,18 @@ function handleDamage(hits) {
         return;
     }
 
-    ship.healthRemaining -= hits * 0.01;
-    for (let i = 0; i < hits; i++) {
-        spawnDebris();
+    if (hits == -1) {
+        ship.healthRemaining = -1;
+    }
+    else {
+        ship.healthRemaining -= hits * 0.01;
+        for (let i = 0; i < hits; i++) {
+            spawnDebris();
 
-        AudioManager.playHit(1);
+            AudioManager.playHit(1);
 
-        events.add(hitEvent);
+            events.add(hitEvent);
+        }
     }
 
     if (ship.healthRemaining <= 0) {
@@ -374,5 +382,7 @@ function gameLoop(timeStamp) {
 
     window.requestAnimationFrame(gameLoop);
 }
+
+initTerrain();
 
 window.requestAnimationFrame(gameLoop);

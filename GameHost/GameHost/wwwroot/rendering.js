@@ -1,9 +1,6 @@
 function drawSea() {
     ctx.beginPath();
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#4080ff"
-    ctx.rect(0, 0, width, height);
-    ctx.fill();
 }
 
 /**
@@ -69,11 +66,20 @@ function drawShip(ship, cannonBalls, otherShips) {
     ctx.fillText(`${Math.floor(ship.health() * 100)}%`, -14, -14);
 
     let nameLength = ship.name.length;
+
+    let shipDepth = getDepth(ship.x, ship.y);
+
+    let terrainHit = shipDepth < 2 ? 0 : shipDepth;
+
     ctx.fillText(ship.name, -3.2 * nameLength, 24);
 
     ctx.translate(-ship.x, -ship.y);
 
-    return cannonBallsHit + shipsHit * 10;
+    if (shipDepth > 3) {
+        return -1;
+    }
+
+    return cannonBallsHit + (shipsHit * 10) + (terrainHit);
 }
 
 /**
@@ -87,9 +93,12 @@ function drawHighlight(ship) {
 
     ctx.translate(ship.x, ship.y);
 
-    ctx.fillStyle = "#5090ff";
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle =  "#ffffff";
     ctx.arc(0, 0, 30, 0, 2 * Math.PI);
     ctx.fill();
+
+    ctx.globalAlpha = 1;
 
     ctx.translate(-ship.x, -ship.y);
 }

@@ -28,18 +28,29 @@
             color: white;
         }
 
-        #game {
+        div {
             display: block;
             margin: 0px auto;
             border: 1px solid white;
-            max-width: 100%;
+            width: 1440px;
+            height: 900px;
+            position: relative;
+        }
+
+        #game, #terrain {
+            position: absolute;
+            top: 0;
+            left: 0;
         }
     </style>
 </head>
 <body>
     <h1>Masts of Mayhem</h1>
 
-    <canvas id="game" width="1440" height="900"></canvas>
+    <div>
+        <canvas id="terrain" width="1440" height="900"></canvas>
+        <canvas id="game" width="1440" height="900"></canvas>
+    </div>
 
     <input id="name" placeholder="Name" maxlength="6">
 
@@ -55,6 +66,7 @@
 
     <script src="./networking.js"></script>
     <script src="./classes.js"></script>
+    <script src="./terrain.js"></script>
     <script src="./rendering.js"></script>
     <script src="./audio.js"></script>
     <script src="./game.js"></script>
