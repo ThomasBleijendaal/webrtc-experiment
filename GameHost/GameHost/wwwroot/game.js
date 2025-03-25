@@ -174,7 +174,7 @@ window.onkeyup = (event) => {
         }
         if (event.code === "KeyE") {
             if (ship.upgrades > 0) {
-                ship.healthRemaining = ship.maxHealth();
+                ship.healthRemaining = Math.min(ship.healthRemaining + 1, ship.maxHealth());
                 ship.upgrades--;
             }
         }
@@ -284,27 +284,37 @@ function handleState(fpsFactor) {
             handleDamage(10);
         }
     }
-    for (let b of cannonBalls.entries()) {
-        let angle = b[0].angle();
+    for (let [b,] of cannonBalls.entries()) {
+        let angle = b.angle();
 
         let dx = fpsFactor * 2.0 * Math.sin(angle);
         let dy = fpsFactor * 2.0 * -Math.cos(angle);
 
-        b[0].x += dx;
-        b[0].y += dy;
-        b[0].age += fpsFactor;
+        b.x += dx;
+        b.y += dy;
+        b.age += fpsFactor;
 
-        if (b[0].x < -30) {
-            b[0].x = width + 29;
+        let terrainHeight = getDepth(b.x, b.y);
+
+        if (terrainHeight > 3) {
+            b.age = 10000;
+
+            smoke.add(new Smoke(
+                b.x,
+                b.y));
         }
-        if (b[0].x > width + 30) {
-            b[0].x = -29;
+
+        if (b.x < -30) {
+            b.x = width + 29;
         }
-        if (b[0].y < -30) {
-            b[0].y = height + 29;
+        if (b.x > width + 30) {
+            b.x = -29;
         }
-        if (b[0].y > height + 30) {
-            b[0].y = -29;
+        if (b.y < -30) {
+            b.y = height + 29;
+        }
+        if (b.y > height + 30) {
+            b.y = -29;
         }
     }
     for (let s of smoke.entries()) {

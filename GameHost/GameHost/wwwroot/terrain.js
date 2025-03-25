@@ -1,5 +1,5 @@
 const WATER_LEVEL = 2, COMPLEXITY = 25, RESOLUTION = 800
-let SCALE = 40, X_POS = 1, Y_POS = 1, SEED = 699814;
+let SCALE = 20, X_POS = 1, Y_POS = 1, SEED = 699814;
 
 const depthMap = Array(RESOLUTION).fill().map(() => Array(RESOLUTION).fill(NaN))
 
@@ -37,7 +37,7 @@ function getDepth(x, y) {
 
 function initTerrain() {
     try {
-        WebAssembly.instantiateStreaming(fetch('terrain/bin/main.wasm'), { imports: { imported_func: arg => console.log(arg) }, js: { mem: new WebAssembly.Memory({ initial: 10, maximum: 100 }) } }).then(
+        WebAssembly.instantiateStreaming(fetch('terrain/main.wasm'), { imports: { imported_func: arg => console.log(arg) }, js: { mem: new WebAssembly.Memory({ initial: 10, maximum: 100 }) } }).then(
             results => {
                 noise = (x, y, f, d, s) => results.instance.exports.perlin2d(x, y, f, d, s);
                 paintMap = (change) => {
